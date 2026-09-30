@@ -32,3 +32,21 @@ export function deleteExercise(setData: SetAppData, id: string): void {
 export function updateProfile(setData: SetAppData, displayName: string, bodyWeightKg: number): void {
   setData((prev) => ({ ...prev, profile: { displayName, bodyWeightKg } }));
 }
+
+export type NewSleepInput = {
+  date: string;
+  durationHours: number;
+  mood: "terrible" | "mal" | "normal" | "bien" | "excelente";
+  notes: string | null;
+};
+
+export function addSleep(setData: SetAppData, input: NewSleepInput): void {
+  setData((prev) => ({
+    ...prev,
+    sleep: [...prev.sleep, { id: makeId(), createdAt: new Date().toISOString(), ...input }],
+  }));
+}
+
+export function deleteSleep(setData: SetAppData, id: string): void {
+  setData((prev) => ({ ...prev, sleep: prev.sleep.filter((s) => s.id !== id) }));
+}

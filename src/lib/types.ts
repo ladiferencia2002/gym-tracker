@@ -14,6 +14,15 @@ export type ExerciseEntry = {
   createdAt: string;
 };
 
+export type SleepEntry = {
+  id: string;
+  date: string; // "YYYY-MM-DD" (noche anterior)
+  durationHours: number;
+  mood: "terrible" | "mal" | "normal" | "bien" | "excelente";
+  notes: string | null;
+  createdAt: string;
+};
+
 export type Profile = {
   displayName: string;
   bodyWeightKg: number;
@@ -22,4 +31,5 @@ export type Profile = {
 export type AppData = {
   profile: Profile;
   exercises: ExerciseEntry[];
+  sleep: SleepEntry[];
 };

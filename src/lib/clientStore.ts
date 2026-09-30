@@ -3,7 +3,7 @@ import type { AppData } from "./types";
 const STORAGE_KEY = "fitstreak-data-v1";
 
 export function emptyData(): AppData {
-  return { profile: { displayName: "", bodyWeightKg: 70 }, exercises: [] };
+  return { profile: { displayName: "", bodyWeightKg: 70 }, exercises: [], sleep: [] };
 }
 
 export function loadData(): AppData {
@@ -15,6 +15,7 @@ export function loadData(): AppData {
     return {
       profile: { ...emptyData().profile, ...parsed.profile },
       exercises: parsed.exercises ?? [],
+      sleep: parsed.sleep ?? [],
     };
   } catch {
     return emptyData();
