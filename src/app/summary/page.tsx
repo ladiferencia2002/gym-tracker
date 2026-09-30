@@ -1,6 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
-import { getExercisesInRange } from "@/lib/data/exercises";
-import { currentMonthId, firstDayOfMonth, isValidMonthId, lastDayOfMonth, shiftMonthId } from "@/lib/dates";
+"use client";
+
+import { useState } from "react";
+import { useAppData } from "@/lib/useAppData";
+import { currentMonthId, firstDayOfMonth, lastDayOfMonth, shiftMonthId } from "@/lib/dates";
 import { computeMonthlySummary } from "@/lib/monthlySummary";
 import { MonthNav } from "@/components/summary/MonthNav";
 import { TypeBreakdownList } from "@/components/summary/TypeBreakdownList";
@@ -14,22 +16,19 @@ function trendMessage(percent: number | null): string {
     : `${rounded}% menos que el mes pasado — vamos por más 💪`;
 }
 
-export default async function SummaryPage(props: PageProps<"/summary">) {
-  const searchParams = await props.searchParams;
-  const rawMonth = typeof searchParams.month === "string" ? searchParams.month : undefined;
-  const monthId = rawMonth && isValidMonthId(rawMonth) ? rawMonth : currentMonthId();
+export default function SummaryPage() {
+  const { data, hydrated } = useAppData();
+  const [monthId, setMonthId] = useState(() => currentMonthId());
+
+  if (!hydrated) return null;
+
   const previousMonthId = shiftMonthId(monthId, -1);
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const [monthExercises, previousMonthExercises] = await Promise.all([
-    getExercisesInRange(supabase, user.id, firstDayOfMonth(monthId), lastDayOfMonth(monthId)),
-    getExercisesInRange(supabase, user.id, firstDayOfMonth(previousMonthId), lastDayOfMonth(previousMonthId)),
-  ]);
+  const monthExercises = data.exercises.filter(
+    (e) => e.performedOn >= firstDayOfMonth(monthId) && e.performedOn <= lastDayOfMonth(monthId)
+  );
+  const previousMonthExercises = data.exercises.filter(
+    (e) => e.performedOn >= firstDayOfMonth(previousMonthId) && e.performedOn <= lastDayOfMonth(previousMonthId)
+  );
 
   const summary = computeMonthlySummary(monthExercises, previousMonthExercises);
 
@@ -42,7 +41,12 @@ export default async function SummaryPage(props: PageProps<"/summary">) {
 
   return (
     <div className="space-y-6">
-      <MonthNav monthId={monthId} />
+      <MonthNav
+        monthId={monthId}
+        onPrev={() => setMonthId(shiftMonthId(monthId, -1))}
+        onNext={() => setMonthId(shiftMonthId(monthId, 1))}
+        onToday={() => setMonthId(currentMonthId())}
+      />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {stats.map((s) => (

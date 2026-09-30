@@ -4,12 +4,12 @@ import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YA
 import { ChartTooltip } from "./ChartTooltip";
 import { exerciseTypeMeta } from "@/lib/exerciseTypes";
 import { formatDateHuman } from "@/lib/dates";
-import type { ExerciseRow } from "@/lib/supabase/types";
+import type { ExerciseEntry } from "@/lib/types";
 
-function metricFor(e: ExerciseRow, meta: ReturnType<typeof exerciseTypeMeta>): number | null {
-  if (meta.tracksSets) return e.weight_kg;
-  if (meta.tracksDistance) return e.distance_km;
-  return e.duration_minutes;
+function metricFor(e: ExerciseEntry, meta: ReturnType<typeof exerciseTypeMeta>): number | null {
+  if (meta.tracksSets) return e.weightKg;
+  if (meta.tracksDistance) return e.distanceKm;
+  return e.durationMinutes;
 }
 
 function metricLabel(meta: ReturnType<typeof exerciseTypeMeta>): { label: string; unit: string } {
@@ -18,13 +18,13 @@ function metricLabel(meta: ReturnType<typeof exerciseTypeMeta>): { label: string
   return { label: "Duración", unit: "min" };
 }
 
-export function MetricProgressChart({ exercises, typeId }: { exercises: ExerciseRow[]; typeId: string }) {
+export function MetricProgressChart({ exercises, typeId }: { exercises: ExerciseEntry[]; typeId: string }) {
   const meta = exerciseTypeMeta(typeId);
   const { label, unit } = metricLabel(meta);
 
   const data = exercises
     .filter((e) => e.type === typeId)
-    .map((e) => ({ date: formatDateHuman(e.performed_on), value: metricFor(e, meta) }))
+    .map((e) => ({ date: formatDateHuman(e.performedOn), value: metricFor(e, meta) }))
     .filter((d): d is { date: string; value: number } => d.value !== null);
 
   if (data.length === 0) {

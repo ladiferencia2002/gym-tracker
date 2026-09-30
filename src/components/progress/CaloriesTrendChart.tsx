@@ -3,7 +3,7 @@
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ChartTooltip } from "./ChartTooltip";
 import { addDays, formatDateHuman } from "@/lib/dates";
-import type { ExerciseRow } from "@/lib/supabase/types";
+import type { ExerciseEntry } from "@/lib/types";
 
 const SERIES_COLOR = "#d95926"; // categorical slot 2 (orange), brand-consistent primary metric
 
@@ -12,13 +12,13 @@ export function CaloriesTrendChart({
   startDate,
   endDate,
 }: {
-  exercises: ExerciseRow[];
+  exercises: ExerciseEntry[];
   startDate: string;
   endDate: string;
 }) {
   const byDate = new Map<string, number>();
   for (const e of exercises) {
-    byDate.set(e.performed_on, (byDate.get(e.performed_on) ?? 0) + e.calories);
+    byDate.set(e.performedOn, (byDate.get(e.performedOn) ?? 0) + e.calories);
   }
 
   const data: { date: string; label: string; calories: number }[] = [];

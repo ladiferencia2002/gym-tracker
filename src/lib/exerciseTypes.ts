@@ -66,22 +66,3 @@ export function exerciseTypeMeta(id: string): ExerciseTypeMeta {
 export function isExerciseTypeId(id: string): id is ExerciseTypeId {
   return BY_ID.has(id as ExerciseTypeId);
 }
-
-// Best-effort mapping from Strava's `type`/`sport_type` values to ours.
-export const STRAVA_TYPE_MAP: Record<string, ExerciseTypeId> = {
-  Run: "running",
-  TrailRun: "running",
-  Walk: "walking",
-  Hike: "hiking",
-  Ride: "cycling",
-  VirtualRide: "cycling",
-  MountainBikeRide: "cycling",
-  Swim: "swimming",
-  Rowing: "rowing",
-  WeightTraining: "weightlifting",
-  Crossfit: "crossfit",
-  HighIntensityIntervalTraining: "hiit",
-  Yoga: "yoga",
-  Pilates: "pilates",
-  Workout: "other",
-};

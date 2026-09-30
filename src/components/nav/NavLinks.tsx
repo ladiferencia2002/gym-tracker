@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export const NAV_ITEMS = [
-  { href: "/dashboard", label: "Inicio", emoji: "🏠" },
+  { href: "/", label: "Inicio", emoji: "🏠" },
   { href: "/log", label: "Registrar", emoji: "➕" },
   { href: "/progress", label: "Progreso", emoji: "📈" },
   { href: "/summary", label: "Resumen", emoji: "🗓️" },

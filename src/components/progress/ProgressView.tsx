@@ -6,20 +6,20 @@ import { TypeBreakdownChart } from "./TypeBreakdownChart";
 import { MetricProgressChart } from "./MetricProgressChart";
 import { EXERCISE_TYPES } from "@/lib/exerciseTypes";
 import { addDays, todayLocal } from "@/lib/dates";
-import type { ExerciseRow } from "@/lib/supabase/types";
+import type { ExerciseEntry } from "@/lib/types";
 
 const RANGE_OPTIONS = [
   { days: 30, label: "30 días" },
   { days: 90, label: "90 días" },
 ];
 
-export function ProgressView({ exercises }: { exercises: ExerciseRow[] }) {
+export function ProgressView({ exercises }: { exercises: ExerciseEntry[] }) {
   const [rangeDays, setRangeDays] = useState(30);
   const today = todayLocal();
   const startDate = addDays(today, -(rangeDays - 1));
 
   const inRange = useMemo(
-    () => exercises.filter((e) => e.performed_on >= startDate && e.performed_on <= today),
+    () => exercises.filter((e) => e.performedOn >= startDate && e.performedOn <= today),
     [exercises, startDate, today]
   );
 

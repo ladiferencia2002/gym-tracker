@@ -1,43 +1,43 @@
-import { createClient } from "@/lib/supabase/server";
-import { getProfile } from "@/lib/data/profile";
+"use client";
+
+import { useAppData } from "@/lib/useAppData";
+import { updateProfile } from "@/lib/mutations";
 import { ProfileForm } from "@/components/settings/ProfileForm";
-import { NotificationToggle } from "@/components/settings/NotificationToggle";
-import { StravaPanel } from "@/components/settings/StravaPanel";
 
-export default async function SettingsPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+export default function SettingsPage() {
+  const { data, hydrated, setData } = useAppData();
 
-  const [profile, { data: stravaConnection }] = await Promise.all([
-    getProfile(supabase, user.id),
-    supabase.from("strava_connections").select("last_synced_at").eq("user_id", user.id).maybeSingle(),
-  ]);
+  if (!hydrated) return null;
+
+  const profile = data.profile;
+
+  function handleProfileSave(displayName: string, bodyWeightKg: number) {
+    updateProfile(setData, displayName, bodyWeightKg);
+  }
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white">Ajustes</h1>
-        <p className="text-sm text-slate-400">Tu perfil, notificaciones y conexiones.</p>
+        <p className="text-sm text-slate-400">Tu perfil y conexiones.</p>
       </div>
 
       <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
         <h2 className="mb-4 text-sm font-semibold text-white">Perfil</h2>
-        <ProfileForm displayName={profile?.display_name ?? ""} bodyWeightKg={profile?.body_weight_kg ?? 70} />
+        <ProfileForm
+          displayName={profile.displayName}
+          bodyWeightKg={profile.bodyWeightKg}
+          onSave={handleProfileSave}
+        />
       </section>
 
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
-        <h2 className="mb-4 text-sm font-semibold text-white">Notificaciones</h2>
-        <NotificationToggle />
-      </section>
-
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
-        <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
+      <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 opacity-75">
+        <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-white">
           <span className="text-lg">🔗</span> Strava
         </h2>
-        <StravaPanel connected={Boolean(stravaConnection)} lastSyncedAt={stravaConnection?.last_synced_at ?? null} />
+        <p className="text-sm text-slate-400">
+          Strava no está disponible en esta versión. Puedes seguir registrando tus entrenamientos manualmente aquí.
+        </p>
       </section>
 
       <section className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 opacity-75">
@@ -57,8 +57,8 @@ export default async function SettingsPage() {
         </h2>
         <p className="text-sm text-slate-400">
           Realme no publica una API pública para Realme Link, así que tampoco se puede conectar directamente. Si tu
-          reloj puede sincronizar tus entrenamientos a Strava automáticamente, esas actividades sí se importarán a
-          través de la conexión de Strava de arriba.
+          reloj puede sincronizar tus entrenamientos a Strava automáticamente, esas actividades sí se importarían a
+          través de Strava (que ahora no está disponible).
         </p>
       </section>
     </div>

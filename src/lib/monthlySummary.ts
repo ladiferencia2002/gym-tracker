@@ -1,4 +1,4 @@
-import type { ExerciseRow } from "@/lib/supabase/types";
+import type { ExerciseEntry } from "@/lib/types";
 
 export type TypeTotal = {
   type: string;
@@ -17,13 +17,13 @@ export type MonthlySummary = {
 };
 
 export function computeMonthlySummary(
-  monthExercises: ExerciseRow[],
-  previousMonthExercises: ExerciseRow[]
+  monthExercises: ExerciseEntry[],
+  previousMonthExercises: ExerciseEntry[]
 ): MonthlySummary {
   const totalSessions = monthExercises.length;
   const totalCalories = monthExercises.reduce((acc, e) => acc + e.calories, 0);
-  const totalMinutes = monthExercises.reduce((acc, e) => acc + e.duration_minutes, 0);
-  const activeDays = new Set(monthExercises.map((e) => e.performed_on)).size;
+  const totalMinutes = monthExercises.reduce((acc, e) => acc + e.durationMinutes, 0);
+  const activeDays = new Set(monthExercises.map((e) => e.performedOn)).size;
 
   const totalsByType = new Map<string, { sessions: number; calories: number }>();
   for (const e of monthExercises) {

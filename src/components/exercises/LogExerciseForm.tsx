@@ -1,25 +1,31 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { createExercise } from "@/app/actions/exercises";
-import { EXERCISE_TYPES, exerciseTypeMeta, type ExerciseTypeId } from "@/lib/exerciseTypes";
+import { useMemo, useRef, useState } from "react";
+import { EXERCISE_TYPES, exerciseTypeMeta, isExerciseTypeId, type ExerciseTypeId } from "@/lib/exerciseTypes";
 import { estimateCalories } from "@/lib/calories";
+import { isValidDate } from "@/lib/dates";
+import type { NewExerciseInput } from "@/lib/mutations";
+
+function numberOrNull(raw: FormDataEntryValue | null): number | null {
+  if (typeof raw !== "string" || raw.trim() === "") return null;
+  const value = Number(raw);
+  return Number.isFinite(value) && value >= 0 ? value : null;
+}
 
 export function LogExerciseForm({
   bodyWeightKg,
   defaultDate,
+  onAdd,
 }: {
   bodyWeightKg: number;
   defaultDate: string;
+  onAdd: (input: NewExerciseInput) => void;
 }) {
-  const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [type, setType] = useState<ExerciseTypeId>("running");
   const [duration, setDuration] = useState("30");
   const [caloriesOverridden, setCaloriesOverridden] = useState(false);
   const [calories, setCalories] = useState(() => estimateCalories("running", 30, bodyWeightKg));
-  const [isPending, startTransition] = useTransition();
   const [justSaved, setJustSaved] = useState(false);
 
   const meta = useMemo(() => exerciseTypeMeta(type), [type]);
@@ -43,21 +49,34 @@ export function LogExerciseForm({
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    startTransition(async () => {
-      await createExercise(formData);
-      formRef.current?.reset();
-      setCaloriesOverridden(false);
-      setJustSaved(true);
-      router.refresh();
-      window.setTimeout(() => setJustSaved(false), 2500);
+    const date = String(formData.get("date") ?? "");
+    const durationMinutes = numberOrNull(formData.get("durationMinutes"));
+    const notes = String(formData.get("notes") ?? "").trim();
+
+    if (!isExerciseTypeId(type) || !isValidDate(date) || !durationMinutes || durationMinutes <= 0) {
+      return;
+    }
+
+    onAdd({
+      type,
+      performedOn: date,
+      durationMinutes,
+      distanceKm: numberOrNull(formData.get("distanceKm")),
+      weightKg: numberOrNull(formData.get("weightKg")),
+      reps: numberOrNull(formData.get("reps")),
+      sets: numberOrNull(formData.get("sets")),
+      calories,
+      notes: notes || null,
     });
+
+    formRef.current?.reset();
+    setCaloriesOverridden(false);
+    setJustSaved(true);
+    window.setTimeout(() => setJustSaved(false), 2500);
   }
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-      <input type="hidden" name="type" value={type} />
-      <input type="hidden" name="calories" value={calories} />
-
       <div>
         <p className="mb-2 text-sm font-medium text-slate-300">¿Qué entrenaste?</p>
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
@@ -206,10 +225,9 @@ export function LogExerciseForm({
 
       <button
         type="submit"
-        disabled={isPending}
-        className="w-full rounded-xl bg-orange-500 py-3 font-semibold text-white transition-colors hover:bg-orange-400 disabled:opacity-50"
+        className="w-full rounded-xl bg-orange-500 py-3 font-semibold text-white transition-colors hover:bg-orange-400"
       >
-        {isPending ? "Guardando…" : justSaved ? "¡Guardado! 🎉" : "Guardar entrenamiento"}
+        {justSaved ? "¡Guardado! 🎉" : "Guardar entrenamiento"}
       </button>
     </form>
   );

@@ -2,7 +2,7 @@
 
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { exerciseTypeMeta } from "@/lib/exerciseTypes";
-import type { ExerciseRow } from "@/lib/supabase/types";
+import type { ExerciseEntry } from "@/lib/types";
 
 function BreakdownTooltip({
   active,
@@ -28,7 +28,7 @@ function BreakdownTooltip({
   );
 }
 
-export function TypeBreakdownChart({ exercises }: { exercises: ExerciseRow[] }) {
+export function TypeBreakdownChart({ exercises }: { exercises: ExerciseEntry[] }) {
   const totals = new Map<string, number>();
   for (const e of exercises) {
     totals.set(e.type, (totals.get(e.type) ?? 0) + e.calories);

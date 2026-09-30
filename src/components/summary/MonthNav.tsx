@@ -1,35 +1,48 @@
-import Link from "next/link";
-import { currentMonthId, monthLabel, shiftMonthId } from "@/lib/dates";
+import { currentMonthId, monthLabel } from "@/lib/dates";
 
-export function MonthNav({ monthId }: { monthId: string }) {
-  const prev = shiftMonthId(monthId, -1);
-  const next = shiftMonthId(monthId, 1);
+export function MonthNav({
+  monthId,
+  onPrev,
+  onNext,
+  onToday,
+}: {
+  monthId: string;
+  onPrev: () => void;
+  onNext: () => void;
+  onToday: () => void;
+}) {
   const isCurrentMonth = monthId === currentMonthId();
 
   return (
     <div className="flex items-center justify-between gap-3">
-      <Link
-        href={`/summary?month=${prev}`}
+      <button
+        type="button"
+        onClick={onPrev}
         aria-label="Mes anterior"
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-800 text-slate-400 transition-colors hover:bg-slate-800"
       >
         ←
-      </Link>
+      </button>
       <div className="text-center">
         <h1 className="text-lg font-semibold text-white">{monthLabel(monthId)}</h1>
         {!isCurrentMonth && (
-          <Link href="/summary" className="text-xs text-slate-500 hover:underline">
+          <button
+            type="button"
+            onClick={onToday}
+            className="text-xs text-slate-500 hover:underline"
+          >
             Volver al mes actual
-          </Link>
+          </button>
         )}
       </div>
-      <Link
-        href={`/summary?month=${next}`}
+      <button
+        type="button"
+        onClick={onNext}
         aria-label="Mes siguiente"
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-800 text-slate-400 transition-colors hover:bg-slate-800"
       >
         →
-      </Link>
+      </button>
     </div>
   );
 }
